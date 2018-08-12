@@ -30,12 +30,14 @@ class PetController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string',
             'status' => 'required|string|in:available,pending,sold',
-            'tags.*.id' => 'required|exists:tags,id',
+            'tags.*.id' => 'required|distinct|exists:tags,id',
         ]);
 
         $pet = Pet::create($validatedData);
 
-        $pet->tags()->attach([1, 2]);
+        $tagsId = array_column($validatedData['tags'], 'id');
+
+        $pet->tags()->attach($tagsId);
 
         return response()->json($pet, 201);
     }
