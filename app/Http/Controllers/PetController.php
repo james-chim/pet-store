@@ -7,15 +7,6 @@ use Illuminate\Http\Request;
 
 class PetController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        return Pet::all();
-    }
 
     /**
      * Show the form for creating a new resource.
@@ -35,7 +26,15 @@ class PetController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            'status' => 'required|string|in:available,pending,sold',
+        ]);
+
+        $pet = Pet::create($validatedData);
+
+        return response()->json($pet, 201);
     }
 
     /**
