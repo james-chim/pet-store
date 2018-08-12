@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Pet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PetController extends Controller
 {
@@ -33,11 +34,16 @@ class PetController extends Controller
             'tags.*.id' => 'required|distinct|exists:tags,id',
         ]);
 
-        $pet = Pet::create($validatedData);
+        // Crate pet using transaction to be more consistent if there is any error happening in between
+        DB::transaction(function () use ($validatedData, &$pet) {
+            $pet = Pet::create($validatedData);
 
-        $tagsId = array_column($validatedData['tags'], 'id');
+            if (isset($validatedData['tags'])) {
+                $tagsId = array_column($validatedData['tags'], 'id');
+                $pet->tags()->attach($tagsId);
+            }
 
-        $pet->tags()->attach($tagsId);
+        });
 
         return response()->json($pet, 201);
     }
