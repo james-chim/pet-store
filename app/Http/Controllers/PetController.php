@@ -31,6 +31,8 @@ class PetController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string',
             'status' => 'required|string|in:available,pending,sold',
+            'photoUrls' => 'array',
+            'photoUrls.*' => 'string',
             'tags.*.id' => 'required|distinct|exists:tags,id',
         ]);
 
