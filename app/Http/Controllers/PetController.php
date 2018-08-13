@@ -66,9 +66,9 @@ class PetController extends Controller
      * @param  \App\Pet  $pet
      * @return \Illuminate\Http\Response
      */
-    public function show(Pet $pet)
+    public function show($pet)
     {
-        //
+        return response()->json(Pet::with('category')->with('tags')->findOrFail($pet), 200);
     }
 
     /**
