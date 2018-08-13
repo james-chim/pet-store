@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Pet;
+use App\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -31,6 +32,7 @@ class PetController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string',
             'status' => 'required|string|in:available,pending,sold',
+            'category.id' => 'exists:categories,id',
             'photoUrls' => 'array',
             'photoUrls.*' => 'string',
             'tags.*.id' => 'required|distinct|exists:tags,id',
@@ -38,13 +40,21 @@ class PetController extends Controller
 
         // Crate pet using transaction to be more consistent if there is any error happening in between
         DB::transaction(function () use ($validatedData, &$pet) {
-            $pet = Pet::create($validatedData);
+            $pet = new Pet($validatedData);
+
+            if (isset($validatedData['category'])) {
+                $category = Category::find($validatedData['category']['id']);
+                 $pet->category()->associate($category);
+                // to prevent another query to database, experimentation
+                // $pet->category_id = $validatedData['category']['id'];
+            }
+
+            $pet->save();
 
             if (isset($validatedData['tags'])) {
                 $tagsId = array_column($validatedData['tags'], 'id');
                 $pet->tags()->attach($tagsId);
             }
-
         });
 
         return response()->json($pet, 201);
