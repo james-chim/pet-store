@@ -19,4 +19,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('/pet', 'PetController@store');
 
-Route::get('/pet/{pet}', 'PetController@show');
+Route::get('/pet/findByTags', 'PetController@showAllByTag');
+Route::get('/pet/{petId}', 'PetController@show');
+
