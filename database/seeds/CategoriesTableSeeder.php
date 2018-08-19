@@ -15,5 +15,8 @@ class CategoriesTableSeeder extends Seeder
         DB::table('categories')->insert([
             'name' => 'Home Pets'
         ]);
+        DB::table('categories')->insert([
+            'name' => 'Home Pets B'
+        ]);
     }
 }

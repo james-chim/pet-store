@@ -20,6 +20,19 @@ class PetController extends Controller
         //
     }
 
+    public function validateStoreUpdateRequest(Request $request, bool $isUpdate) {
+        return $request->validate([
+            'id' => ($isUpdate ? 'required|' : '') . 'integer',
+            'name' => 'required|string',
+            'status' => 'required|string|in:available,pending,sold',
+            'category' => 'required',
+            'category.id' => 'exists:categories,id',
+            'photoUrls' => 'present|array', // require the array to be present but can be empty
+            'photoUrls.*' => 'string',
+            'tags.*.id' => 'required|distinct|exists:tags,id',
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -29,15 +42,7 @@ class PetController extends Controller
     public function store(Request $request)
     {
 
-        $validatedData = $request->validate([
-            'name' => 'required|string',
-            'status' => 'required|string|in:available,pending,sold',
-            'category' => 'required',
-            'category.id' => 'exists:categories,id',
-            'photoUrls' => 'present|array', // require the array to be present but can be empty
-            'photoUrls.*' => 'string',
-            'tags.*.id' => 'required|distinct|exists:tags,id',
-        ]);
+        $validatedData = $this->validateStoreUpdateRequest($request, false);
 
         // Crate pet using transaction to be more consistent if there is any error happening in between
         DB::transaction(function () use ($validatedData, &$pet) {
@@ -109,12 +114,38 @@ class PetController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Pet  $pet
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Pet $pet)
+    public function update(Request $request)
     {
-        //
+
+        $validatedData = $this->validateStoreUpdateRequest($request, true);
+
+        // Crate pet using transaction to be more consistent if there is any error happening in between
+        DB::transaction(function () use ($validatedData, &$pet) {
+            $pet = Pet::findOrFail($validatedData['id']);
+            $pet->fill($validatedData);
+
+            $pet->category()->dissociate();
+
+            if (isset($validatedData['category'])) {
+                $category = Category::find($validatedData['category']['id']);
+                $pet->category()->associate($category);
+                // to prevent another query to database, experimentation
+                // $pet->category_id = $validatedData['category']['id'];
+            }
+
+            $pet->save();
+
+            // Only associate tags with the pet if tags property exists
+            $tagsId = [];
+            if (isset($validatedData['tags'])) {
+                $tagsId = array_column($validatedData['tags'], 'id');
+            }
+            $pet->tags()->sync($tagsId);
+        });
+
+        return response()->json($pet, 200);
     }
 
     /**
