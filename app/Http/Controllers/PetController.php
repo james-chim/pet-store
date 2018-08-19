@@ -64,12 +64,23 @@ class PetController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Pet  $pet
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function show($pet)
+    public function showAllByTag(Request $request)
     {
-        return response()->json(Pet::with('category')->with('tags')->findOrFail($pet), 200);
+        dd("james");
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  Integer  $petId
+     * @return \Illuminate\Http\Response
+     */
+    public function show($petId)
+    {
+        return response()->json(Pet::with('category')->with('tags')->findOrFail($petId), 200);
     }
 
     /**
