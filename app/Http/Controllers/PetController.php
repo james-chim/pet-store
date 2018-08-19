@@ -32,8 +32,9 @@ class PetController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string',
             'status' => 'required|string|in:available,pending,sold',
+            'category' => 'required',
             'category.id' => 'exists:categories,id',
-            'photoUrls' => 'array',
+            'photoUrls' => 'present|array', // require the array to be present but can be empty
             'photoUrls.*' => 'string',
             'tags.*.id' => 'required|distinct|exists:tags,id',
         ]);
@@ -69,7 +70,17 @@ class PetController extends Controller
      */
     public function showAllByTag(Request $request)
     {
-        dd("james");
+        $validatedData = $request->validate([
+            'tags' => 'required|string'
+        ]);
+        $tags = explode(', ', $validatedData['tags']);
+//        $a = Pet::with('category')->with('tags')
+//            ->whereIn('tags.name', $tags)->get();
+        $result = Pet::with('category')->with('tags')
+            ->whereHas('tags', function($query) use ($tags) {
+                $query->whereIn('name', $tags);
+            })->get();
+        return response()->json($result, 200);
     }
 
     /**
