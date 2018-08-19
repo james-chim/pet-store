@@ -20,6 +20,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('/pet', 'PetController@store');
 Route::put('/pet', 'PetController@update');
 
+Route::get('/pet/{petId}', 'PetController@show')->where('petId', '[0-9]+');
+Route::delete('/pet/{petId}', 'PetController@destroy')->where('petId', '[0-9]+');
+
 Route::get('/pet/findByTags', 'PetController@showAllByTag');
-Route::get('/pet/{petId}', 'PetController@show');
+
 

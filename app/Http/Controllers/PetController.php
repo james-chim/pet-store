@@ -91,10 +91,10 @@ class PetController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  Integer  $petId
+     * @param  int  $petId
      * @return \Illuminate\Http\Response
      */
-    public function show($petId)
+    public function show(int $petId)
     {
         return response()->json(Pet::with('category')->with('tags')->findOrFail($petId), 200);
     }
@@ -151,11 +151,13 @@ class PetController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Pet  $pet
+     * @param  int  $petId
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Pet $pet)
+    public function destroy(int $petId)
     {
-        //
+        Pet::findOrFail($petId)->delete();
+
+        return response()->json('Deleted Successfully.', 200);
     }
 }

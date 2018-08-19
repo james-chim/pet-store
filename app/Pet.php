@@ -3,10 +3,20 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pet extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['name', 'status', 'photoUrls'];
+
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = ['deleted_at'];
 
     /**
      * The attributes that should be casted to native types.

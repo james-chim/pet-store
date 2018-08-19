@@ -20,6 +20,7 @@ class CreatePetsTable extends Migration
             $table->text('photoUrls');
             $table->integer('category_id');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
