@@ -51,6 +51,7 @@ class PetController extends Controller
 
             $pet->save();
 
+            // Only associate tags with the pet if tags property exists
             if (isset($validatedData['tags'])) {
                 $tagsId = array_column($validatedData['tags'], 'id');
                 $pet->tags()->attach($tagsId);
