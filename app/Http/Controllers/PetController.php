@@ -157,7 +157,7 @@ class PetController extends Controller
     public function destroy(int $petId)
     {
         Pet::findOrFail($petId)->delete();
-
+        // TODO: check if the pet has order
         return response()->json('Deleted Successfully.', 200);
     }
 }

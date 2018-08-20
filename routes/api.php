@@ -25,4 +25,6 @@ Route::delete('/pet/{petId}', 'PetController@destroy')->where('petId', '[0-9]+')
 
 Route::get('/pet/findByTags', 'PetController@showAllByTag');
 
+Route::post('/store/order', 'OrderControlloer@store');
+
 

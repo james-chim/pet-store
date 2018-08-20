@@ -32,6 +32,11 @@ class Pet extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
     public function tags() {
         return $this->belongsToMany(Tag::class, 'pets_tags', 'pet_id', 'tag_id');
     }
