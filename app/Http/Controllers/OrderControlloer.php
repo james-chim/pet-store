@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Order;
+use App\Pet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderControlloer extends Controller
 {
@@ -36,12 +38,29 @@ class OrderControlloer extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'petId' => 'required|Integer',
+            'petId' => 'required|Integer|exists:pets,id',
             'status' => 'required|string|in:placed,approved,delivered',
             'quantity' => 'required|Integer|min:1',
             'shipDate' => 'required|date|after:now',
             'complete' => 'required|Boolean',
         ]);
+
+        $pet = Pet::findOrFail($validatedData['petId']);
+
+        if ($pet->status !== 'available') {
+            return response()->json('Pet is not available for purchase', 400);
+        }
+
+        // Crate pet using transaction to be more consistent if there is any error happening in between
+        DB::transaction(function () use ($validatedData, $pet, &$order) {
+            $order = new Order($validatedData);
+            $order->pet()->save($pet); // TODO: Need to be fixed
+            $order->save();
+            $pet->status = 'pending';
+            $pet->save();
+        });
+
+        return response()->json($order, 201);
     }
 
     /**
